@@ -1,5 +1,5 @@
 import ast
-
+from twilio.rest import Client
 import requests
 from datetime import date, datetime, timedelta
 
@@ -7,13 +7,31 @@ STOCK = "TSLA"
 COMPANY_NAME = "Tesla Inc"
 ALPHA_API_KEY = "AH40ME03824UEIQ7"
 NEWS_API_KEY = "7f863b27a4bc4507bf44c2b6ac72f747"
-
+TWILIO_SID = "AC4998de1745722ffbed33028f9cae7aa7"
+TWILIO_AUTH_TOKEN = "933ec0f3df64b32f0f18b62f374cfec9"
 
 parameters = {
     "function": "TIME_SERIES_DAILY_ADJUSTED",
     "symbol": "TSLA",
     "apikey": ALPHA_API_KEY
 }
+
+parameters_for_twilio = {
+
+
+}
+
+
+client = Client(TWILIO_SID, TWILIO_AUTH_TOKEN)
+
+message = client.messages \
+                .create(
+                     body="Join Earth's mightiest heroes. Like Kevin Bacon.",
+                     from_='+14752514656',
+                     to='+48 883 277 736'
+                 )
+
+print(message.status)
 
 
 #####  GETS ACCESS FROM THE ALPHA API AND PUTS TSLA INFO INTO DATA  #####
@@ -22,7 +40,7 @@ response.raise_for_status()
 data_for_alpha = response.json()
 
 #####  DATE OF THE CURRENT DAY  #####
-current_date = date.today() - timedelta(days=3)
+current_date = date.today()
 
 yesterday = current_date - timedelta(days=1)
 before_yesterday = current_date - timedelta(days=2)
@@ -69,7 +87,7 @@ if float(percentile_of_difference) < 0 and float(percentile_of_difference) <= -5
 elif float(percentile_of_difference) > 0 and float(percentile_of_difference) >= 5:
     print(three_news_about_the_company)
 else:
-    print("No Need For News the change in the market isn't great than 5%")
+    print("No Need For News the change in the market isn't greater than 5%")
 
 
 
