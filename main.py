@@ -10,11 +10,10 @@ load_dotenv()
 
 STOCK = "TSLA"
 COMPANY_NAME = "Tesla Inc"
-ALPHA_API_KEY = os.getenv("ALPHA_API_KEY")
-NEWS_API_KEY = os.getenv("NEWS_API_KEY")
-TWILIO_SID = os.getenv("TWILIO_SID")
-TWILIO_AUTH_TOKEN = os.getenv("TWILIO_AUTH_TOKEN")
-
+ALPHA_API_KEY = os.environ.get("ALPHA_API_KEY")
+NEWS_API_KEY = os.environ.get("NEWS_API_KEY")
+TWILIO_SID = os.environ.get("TWILIO_SD")
+TWILIO_AUTH_TOKEN = os.environ.get("TWILIO_AUTH_TOKEN")
 
 parameters = {
     "function": "TIME_SERIES_DAILY_ADJUSTED",
