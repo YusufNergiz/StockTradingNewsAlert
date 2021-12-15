@@ -1,4 +1,7 @@
 import ast
+import os
+
+from twilio.http.http_client import TwilioHttpClient
 from twilio.rest import Client
 import requests
 from datetime import date, datetime, timedelta
@@ -8,31 +11,13 @@ COMPANY_NAME = "Tesla Inc"
 ALPHA_API_KEY = "AH40ME03824UEIQ7"
 NEWS_API_KEY = "7f863b27a4bc4507bf44c2b6ac72f747"
 TWILIO_SID = "AC4998de1745722ffbed33028f9cae7aa7"
-TWILIO_AUTH_TOKEN = "933ec0f3df64b32f0f18b62f374cfec9"
+TWILIO_AUTH_TOKEN = "846f6810b44bfbb3dbeaee3f9626c127"
 
 parameters = {
     "function": "TIME_SERIES_DAILY_ADJUSTED",
     "symbol": "TSLA",
     "apikey": ALPHA_API_KEY
 }
-
-parameters_for_twilio = {
-
-
-}
-
-
-client = Client(TWILIO_SID, TWILIO_AUTH_TOKEN)
-
-message = client.messages \
-                .create(
-                     body="Join Earth's mightiest heroes. Like Kevin Bacon.",
-                     from_='+14752514656',
-                     to='+48 883 277 736'
-                 )
-
-print(message.status)
-
 
 #####  GETS ACCESS FROM THE ALPHA API AND PUTS TSLA INFO INTO DATA  #####
 response = requests.get("https://www.alphavantage.co/query", params=parameters)
@@ -64,7 +49,9 @@ three_news_about_the_company = []
 
 for news_number in range(3):
     top_3_news = data_for_news["articles"][news_number]["description"]
-    three_news_about_the_company.append(f"News Number {news_number + 1}: {top_3_news}")
+    three_news_about_the_company.append(f"{top_3_news}")
+
+latest_news_about_the_company = three_news_about_the_company[0]
 
 ##### THE OPENING PRICE OF TSLA BEFORE YESTEDAY  #####
 before_yesterday_stock_price = float(data_for_alpha["Time Series (Daily)"][f"{before_yesterday}"]["1. open"])
@@ -78,14 +65,37 @@ yesterday_stock_price = float(data_for_alpha["Time Series (Daily)"][f"{yesterday
 difference_of_two_days = yesterday_stock_price - before_yesterday_stock_price
 
 #####  THE FINAL PERCENTAGE DIFFERENCE  #####
-percentile_of_difference = (float(difference_of_two_days) * 100)/before_yesterday_stock_price
+# percentile_of_difference = (float(difference_of_two_days) * 100)/before_yesterday_stock_price
+percentile_of_difference = 12
+
+direction_of_price = ""
+if float(percentile_of_difference) < 0 and float(percentile_of_difference) <= -5:
+    direction_of_price = "🔻"
+elif float(percentile_of_difference) > 0 and float(percentile_of_difference) >= 5:
+    direction_of_price = "🔺"
+
+
+proxy_client = TwilioHttpClient()
+client = Client(TWILIO_SID, TWILIO_AUTH_TOKEN)
+
+message = client.messages \
+                .create(
+                     body=f"{data_for_alpha['Meta Data']['2. Symbol']}: {direction_of_price}{round(percentile_of_difference)}%\n"
+                        f"Headline: {data_for_news['articles'][0]['title']}\n"
+                        f"Brief: {latest_news_about_the_company}",
+                     from_='+14752514656',
+                     to='+48 883 277 736'
+                 )
+
+print(message.status)
+
+
 
 #####  IF THE STOCK PRICE INCREASED OR DECREASED BY 5% IT PRINTS THREE POPULAR NEWS ABOUT THE COMPANY  #####
-print(percentile_of_difference)
 if float(percentile_of_difference) < 0 and float(percentile_of_difference) <= -5:
-    print(three_news_about_the_company)
+    print(latest_news_about_the_company)
 elif float(percentile_of_difference) > 0 and float(percentile_of_difference) >= 5:
-    print(three_news_about_the_company)
+    print(latest_news_about_the_company)
 else:
     print("No Need For News the change in the market isn't greater than 5%")
 
